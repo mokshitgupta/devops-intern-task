@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/mokshitgupta/devops-intern-task.git'
+                git branch: 'main', url: 'https://github.com/mokshitgupta/devops-intern-task.git'
             }
         }
 
