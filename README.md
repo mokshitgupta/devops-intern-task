@@ -26,27 +26,28 @@ The application exposes two endpoints:
 
 
 
+## Deployment
 
-##Deployment
 Application deployed on AWS EC2.
 
-Docker container runs as non-root user.
+Docker container runs as a non-root user.
 
+### Access the application
 
-Access the app via:
-Health check: http://<EC2_PUBLIC_IP>:8000/health
-Hello endpoint: http://<EC2_PUBLIC_IP>:8000/hello
+- Health check: `http://<EC2_PUBLIC_IP>:8000/health`
+- Hello endpoint: `http://<EC2_PUBLIC_IP>:8000/hello`
 
-##Notes / Assumptions
-Docker and Jenkins installed on EC2.
-Jenkins user has permission to run Docker commands.
-Docker Hub credentials stored in Jenkins (docker-hub-creds).
-EC2 security group allows traffic on port 8000.
+---
 
-##CI/CD Workflow
+## Notes / Assumptions
+
+- Docker and Jenkins are installed on the EC2 instance
+- Jenkins user has permission to run Docker commands
+- Docker Hub credentials are stored in Jenkins (`docker-hub-creds`)
+- EC2 security group allows inbound traffic on port **8000**
+
+---
+
+## CI/CD Workflow
+
 GitHub → Jenkins → Docker Build → Docker Hub Push → EC2 Deployment
-
-##Conclusion
-FastAPI application containerized with Docker.
-CI/CD pipeline automates build, push, deployment.
-Application accessible publicly via EC2 IP on port 8000.
