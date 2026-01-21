@@ -2,42 +2,63 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "fastapi-app"
-        CONTAINER_NAME = "fastapi_container"
-        PORT = "8000"
+        IMAGE_NAME = "mokshitgupta/fastapi-app"
+        IMAGE_TAG = "latest"
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/mokshitgupta/devops-intern-task.git'
+                git branch: 'main',
+                    url: 'https://github.com/mokshitgupta/devops-intern-task.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $IMAGE_NAME ."
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+            }
+        }
+
+        stage('Docker Hub Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sh """
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                docker run -d -p $PORT:8000 --name $CONTAINER_NAME --restart unless-stopped $IMAGE_NAME
-                """
+                sh '''
+                docker stop fastapi_container || true
+                docker rm fastapi_container || true
+                docker run -d -p 8000:8000 \
+                --name fastapi_container \
+                --restart unless-stopped \
+                $IMAGE_NAME:$IMAGE_TAG
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "FastAPI app deployed successfully at port $PORT"
+            echo "CI/CD pipeline completed successfully!"
         }
         failure {
             echo "Pipeline failed. Check logs."
         }
     }
 }
-
